@@ -8,7 +8,7 @@ Created on Fri Jan 17 15:08:14 2025
 with open('C:\\Users\castelf\Documents\GitHub\AoC\\2016\day1.txt','r') as f:
     instr=f.read().split(', ')
 
-# test='R2, R2, R2'
+# test='R8, R4, R4, R8'
 # instr=test.split(', ')
 
 direction='NESW'
@@ -27,18 +27,29 @@ for ins in instr:
         dir_num=dir_num%len(direction)
     
     if direction[dir_num]=='N':
-        y+=int(ins[1:])
+        for i in range(1,1+int(ins[1:])):
+            y+=1
+            if (x,y) in path:
+                revis.append((x,y))
+            path.append((x,y))
     elif direction[dir_num]=='S':
-        y-=int(ins[1:])
+        for i in range(1,1+int(ins[1:])):
+            y-=1
+            if (x,y) in path:
+                revis.append((x,y))
+            path.append((x,y))
     elif direction[dir_num]=='E':
-        x+=int(ins[1:])
+        for i in range(1,1+int(ins[1:])):
+            x+=1
+            if (x,y) in path:
+                revis.append((x,y))
+            path.append((x,y))
     elif direction[dir_num]=='W':
-        x-=int(ins[1:])
-    
-    if (x,y) in path:
-        revis.append((x,y))
-    path.append((x,y))
-    
+        for i in range(1,1+int(ins[1:])):
+            x-=1
+            if (x,y) in path:
+                revis.append((x,y))
+            path.append((x,y))
 
 print(abs(x)+abs(y))
 print(abs(revis[0][0])+abs(revis[0][1]))
