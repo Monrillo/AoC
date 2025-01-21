@@ -30,9 +30,13 @@ for line in lines:
     if all(counts[code[i]]>counts[code[i+1]] or \
            (counts[code[i]]==counts[code[i+1]] and ord(code[i])<ord(code[i+1])) for i in range(4)):
         sector_id+=int(checksum)
+    phrase=''
     for word in words:
         new_word=np.array([ord(x) for x in word])+int(checksum)%26
-        new_word=np.array([x for x in new_word if x<=122 else x-26 for x in new_word])
+        new_word[np.where(new_word>122)[0]]-=26
+        phrase+=''.join([chr(x) for x in new_word])+' '
+    if phrase.find('north')!=-1:
+        sector_northpole=int(checksum)
 
 print(sector_id)
-
+print(sector_northpole)
