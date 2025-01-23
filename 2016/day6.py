@@ -28,3 +28,13 @@ for resul in res:
 
 print(ans1)
 print(ans2)
+
+# from collections import Counter
+# ans1, ans2 = '', ''
+# with open('06.txt') as fp:
+#     for stuff in zip(*fp.read().strip().split('\n')):
+#         counter = Counter(stuff).most_common()
+#         ans1 += counter[0][0]
+#         ans2 += counter[-1][0]
+# print(ans1)
+# print(ans2)
