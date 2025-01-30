@@ -17,4 +17,14 @@ for x in range(len(area)):
 area[1,1]='O'
 area[4,7]='X'
 
-print(area)
+def move(x,y):
+    pos_m=[]
+    if y-1>=0 and area[y-1,x]=='.': pos_m.append((y-1,x))
+    if y+1<len(area) and area[y+1,x]=='.': pos_m.append((y+1,x))
+    if x-1>=0 and area[y,x-1]=='.': pos_m.append((y,x-1))
+    if x+1<len(area) and area[y,x+1]=='.': pos_m.append((y,x+1))
+    return pos_m
+
+pos_move=move(1,1)
+if (4,7) in pos_move: step+=1;break
+next_move=pos_move[np.random.randint(len(pos_move))]
