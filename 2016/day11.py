@@ -2,128 +2,151 @@
 """
 Created on Wed Feb 12 17:24:23 2025
 
-@author: castelf
+@author: drathke924
+Not me !!!
 """
 
-import re
-from copy import deepcopy
-from collections import defaultdict
-from itertools import permutations
-
-floors = [[], [], [], []]
-elevator_position = 0
-
-regex = r"a (.*?) (generator|microchip)"
-
-object_counter = 0
-
-with open('C:\\Users\castelf\Documents\GitHub\AoC\\2016\day11.txt', 'r') as input_file:
-    for floor_index, line in enumerate(input_file, start=0):
-        if 'nothing relevant' in line:
-            pass
-        else:
-            matches = re.finditer(regex, line)
-            for match in matches:
-                object_counter += 1
-                material, thing_type = match.groups()
-                if thing_type == 'microchip':
-                    material = material.split('-')[0]
-                floors[floor_index].append([material, thing_type])
-
-# print floors
-
-# find 2 items safe to bring upstairs
-# find 1 item safe to bring upstairs
-# find 1 item safe to bring downstairs
-# find 2 items safe to bring downstairs
-# if you can't, backtrack, avoiding loops (yay for only four floors)
+# The first floor contains a polonium generator, a thulium generator, a thulium-compatible microchip, a promethium generator, a ruthenium generator, a ruthenium-compatible microchip, a cobalt generator, and a cobalt-compatible microchip.
+# The second floor contains a polonium-compatible microchip and a promethium-compatible microchip.
+# The third floor contains nothing relevant.
+# The fourth floor contains nothing relevant.
 
 
-def safe_floor(floor):
-    if not floor:
-        return True
+import time
+import copy
 
-    stuff = defaultdict(list)
-    for item in floor:
-        stuff[item[0]].append(item[1])
-
-    return len(set(map(lambda x: 'microchip' in x, [group for index, group in stuff.items() if len(group) == 1]))) < 2
+start_time = time.time()
 
 
-def same_floors(f1, f2):
-    return [sorted(floor) for floor in f1] == [sorted(floor) for floor in f2]
+start_floors = [["OG", "TG", "TM", "PG", "RG", "RM", "CG", "CM"], ["OM", "PM"], [], []]
 
 
-def process_floor(position, func_floors, previous_floors, level=0):
-    # print func_floors[position]
-    if position == 3 and len(func_floors[position]) == object_counter:
-        # print 'Done'
-        print (level)
-        # print func_floors
-        return True
-    # bring upstairs
-    if position < 3:
-        for perm in permutations(func_floors[position], 2):
-            # print perm, 'being analyzed'
-            copy_floors = deepcopy(func_floors)
-            if safe_floor(func_floors[position + 1] + list(perm)):
-                map(copy_floors[position].remove, perm)
-                # print perm, 'removed'
-                if safe_floor(copy_floors[position]):
-                    copy_floors[position + 1] += list(perm)
-                    if not same_floors(copy_floors, previous_floors):
-                        # print perm, 'going up'
-                        if process_floor(position + 1, copy_floors, func_floors, level + 1):
-                            return True
-        for perm in func_floors[position]:
-            # print perm, 'being analyzed'
-            copy_floors = deepcopy(func_floors)
-            if safe_floor(func_floors[position + 1] + [list(perm)]):
-                copy_floors[position].remove(perm)
-                # print perm, 'removed'
-                if safe_floor(copy_floors[position]):
-                    copy_floors[position + 1] += [list(perm)]
-                    if not same_floors(copy_floors, previous_floors):
-                        # print perm, 'going up'
-                        if process_floor(position + 1, copy_floors, func_floors, level + 1):
-                            return True
-    # bring downstairs
-    if position >= 0:
-        for perm in func_floors[position]:
-            # print perm, 'being analyzed'
-            copy_floors = deepcopy(func_floors)
-            if safe_floor(func_floors[position - 1] + [list(perm)]):
-                copy_floors[position].remove(perm)
-                # print perm, 'removed'
-                if safe_floor(copy_floors[position]):
-                    copy_floors[position - 1] += [list(perm)]
-                    if not same_floors(copy_floors, previous_floors):
-                        # print perm, 'going down'
-                        if process_floor(position - 1, copy_floors, func_floors, level + 1):
-                            return True
-        for perm in permutations(func_floors[position], 2):
-            # print perm, 'being analyzed'
-            copy_floors = deepcopy(func_floors)
-            if safe_floor(func_floors[position - 1] + list(perm)):
-                map(copy_floors[position].remove, perm)
-                # print perm, 'removed'
-                if safe_floor(copy_floors[position]):
-                    copy_floors[position - 1] += list(perm)
-                    if not same_floors(copy_floors, previous_floors):
-                        # print perm, 'going down'
-                        if process_floor(position - 1, copy_floors, func_floors, level + 1):
-                            return True
+def check_valid(dest, pt1, pt2, validfloors, validelevator):
+	testdest = list(validfloors[dest])
+	testdest.append(pt1)
+	if pt2 != "":
+		testdest.append(pt2)
 
-    return False
+	for i in testdest:
+		if i[1] == "M":
+			for j in testdest:
+				if j[1] == "G" and i[0] + "G" not in testdest:
+					return False
+
+	if pt1 not in validfloors[validelevator]:
+		return False
+	if pt2 != "" and pt2 not in validfloors[validelevator]:
+		return False
+
+	testfloor = list(validfloors[validelevator])
+	testfloor.remove(pt1)
+	if pt2 != "":
+		testfloor.remove(pt2)
+	for i in testfloor:
+		if i[1] == "M" and i[0] + "G" not in testfloor:
+			for j in testfloor:
+				if j != i and j[1] == "G":
+					return False
+	return True
 
 
-process_floor(elevator_position, floors, floors)
 
-floors[0] += [['elerium', 'generator'],
-              ['elerium', 'microchip'],
-              ['dilithium', 'generator'],
-              ['dilithium', 'microchip']]
+def do_move(destination, part1, part2, infloors, inelevator, steps):
+	movefloors = copy.deepcopy(infloors)
+	moveelevator = int(inelevator)
+	valid = check_valid(destination, part1, part2, movefloors, moveelevator)
+	state = [[0, 0, 0],[0, 0, 0],[0, 0, 0],[0, 0, 0], destination]
+	if not valid:
+		return False
+	else:
+		movefloors[destination].append(part1)
+		if part2 != "":
+			movefloors[destination].append(part2)
+		movefloors[moveelevator].remove(part1)
+		if part2 != "":
+			movefloors[moveelevator].remove(part2)
+		movefloors[destination] = sorted(movefloors[destination])
+		moveelevator = destination
+	for i in range(4):
+		for j in movefloors[i]:
+			if j[1] == "M":
+				if j[0] + "G" not in movefloors[i]:
+					state[i][0] += 1
+				else:
+					state[i][2] += 1
+			else:
+				if j[0] + "M" not in movefloors[i]:
+					state[i][1] += 1
 
-object_counter += 4
+	return [movefloors, moveelevator, state, steps]
 
-process_floor(elevator_position, floors, floors)
+
+def findPath(start_floors, amount):
+	steps = 1
+	start_elevator = 0
+	moves = []
+	seen = []
+	checked = []
+	found = False
+	for i in start_floors[start_elevator]:
+		test = do_move(1, i, "", start_floors, start_elevator, steps)
+		if test != False and test[2] not in seen:
+			moves.append(test)
+			seen.append(test[2])
+		for j in start_floors[start_elevator]:
+			if i != j:
+				test = do_move(1, i, j, start_floors, start_elevator, steps)
+				if test != False and test[2] not in seen:
+					moves.append(test)
+					seen.append(test[2])
+
+	while not found:
+		steps += 1
+		for i in copy.deepcopy(moves):
+			moves.remove(i)
+			if len(i[0][3]) == amount:
+				return i[3]
+			floors = i[0]
+			elevator = i[1]
+			testfloors = copy.deepcopy(floors)
+			testelevator = int(elevator)
+			for p1 in testfloors[testelevator]:
+				for p2 in testfloors[testelevator]:
+					if p1 != p2:
+						if testelevator < 3:
+							test = do_move(testelevator + 1, p1, p2, testfloors, testelevator, steps)
+							if test != False and test[2] not in seen:
+								moves.append(test)
+								seen.append(test[2])
+				if testelevator < 3:
+					test = do_move(testelevator + 1, p1, "", testfloors, testelevator, steps)
+					if test != False and test[2] not in seen:
+						moves.append(test)
+						seen.append(test[2])
+				testfloors = copy.deepcopy(floors)
+				if elevator > 1 and all(testfloors[x] == [] for x in range(1, elevator)):
+					continue
+				if testelevator > 0:
+					test = do_move(testelevator - 1, p1, "", testfloors, testelevator, steps)
+					if test != False and test[2] not in seen:
+						moves.append(test)
+						seen.append(test[2])
+				for p2 in testfloors[testelevator]:
+					if p1[0] != p2[0]:
+						if testelevator > 0:
+							test = do_move(testelevator - 1, p1, p2, testfloors, testelevator, steps)
+							if test != False and test[2] not in seen:
+								moves.append(test)
+								seen.append(test[2])
+
+
+
+floors = [["OG", "TG", "TM", "PG", "RG", "RM", "CG", "CM"], ["OM", "PM"], [], []]
+print(findPath(floors, 10))
+print("Run time: %s" % (time.time() - start_time))
+
+
+start_time = time.time()
+floors = [["EG", "EM", "DG", "DM", "OG", "TG", "TM", "PG", "RG", "RM", "CG", "CM"], ["OM", "PM"], [], []]
+print(findPath(floors, 14))
+print("Run time: %s" % (time.time() - start_time))
