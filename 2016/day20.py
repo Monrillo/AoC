@@ -17,8 +17,8 @@ def test_ip(ip):
     return True
 
 candidates=[d[1]+1 for d in data]
-cand=[x for x in candidates if x<=4294967295]
-valids=[x for x in cand if test_ip(x)]
+
+valids=[x for x in candidates if test_ip(x) and x<=4294967295]
 
 print(valids[0])
 print(len(valids))
