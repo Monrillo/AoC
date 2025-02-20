@@ -5,7 +5,7 @@ Created on Thu Feb 20 15:16:44 2025
 @author: castelf
 """
 
-with open('C:\\Users\castelf\Documents\GitHub\AoC\\2017\day1.txt','r') as f: line=f.read()
+line=open('C:\\Users\castelf\Documents\GitHub\AoC\\2017\day1.txt','r').read()
 circ=line+line[0]
 res=0
 for a,b in zip(circ, circ[1:]):
