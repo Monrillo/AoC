@@ -5,6 +5,10 @@ Created on Mon Mar 17 10:26:57 2025
 @author: castelf
 """
 
+# import numpy as np
+
+# test=np.loadtxt('C:\\Users\castelf\Documents\GitHub\AoC\\2017\day19.txt',dtype=str)
+
 import re
 
 mat=[list(line[:-1]) for line in open('C:\\Users\castelf\Documents\GitHub\AoC\\2017\day19.txt','r').readlines()]
