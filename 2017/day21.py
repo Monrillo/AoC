@@ -30,7 +30,7 @@ def check_mat(mat):
         if line_mat(m) in inst[:,0]: return np.where(inst[:,0]==line_mat((m)))[0][0];break
 
 for _ in range(5):
-    if len(matrix)%2==0: num_mat=len(matrix)//2
+    if (len(matrix)//2)%2==0: num_mat=len(matrix)//2
     else: num_mat=len(matrix)//3
     
     cut=np.concatenate([np.hsplit(m,num_mat) for m in np.vsplit(matrix,num_mat)])
@@ -39,6 +39,7 @@ for _ in range(5):
 
 print(np.where(matrix=='#')[0].size)
 
+(len(matrix)//2)%2
 
 import numpy as np
 from collections import Counter
