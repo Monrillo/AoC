@@ -27,27 +27,31 @@ with open('C:\\Users\castelf\Documents\GitHub\AoC\\2023\day13.txt','r') as f: li
 # '..##..###',
 # '#....#..#']
 
+def score(m):
+    score=0
+    for c in range(m.shape[1]):
+        ce=(2*c-m.shape[1])
+        if ce>0:
+            if np.array_equiv(m[:,ce:c], np.fliplr(m[:,c:2*c])): score+=c
+        else:
+            if np.array_equiv(m[:,:c], np.fliplr(m[:,c:2*c])): score+=c
+    for r in range(m.shape[0]):
+        re=(2*r-m.shape[0])
+        if re>0:
+            if np.array_equiv(m[re:r,:], np.flipud(m[r:2*r,:])): score+=r*100
+        else:
+            if np.array_equiv(m[:r,:], np.flipud(m[r:2*r,:])): score+=r*100
+    return score
 
 lines.append('')
 
-score=0
+score_tot=0
 mat=[]
 for line in lines:
     if line.strip()!='':mat.append(list(line.strip()))
     else:
         matrix=np.array(mat)
-        for c in range(matrix.shape[1]):
-            ce=(2*c-matrix.shape[1])
-            if ce>0:
-                if np.array_equiv(matrix[:,ce:c], np.fliplr(matrix[:,c:2*c])): score+=c
-            else:
-                if np.array_equiv(matrix[:,:c], np.fliplr(matrix[:,c:2*c])): score+=c
-        for r in range(matrix.shape[0]):
-            re=(2*r-matrix.shape[0])
-            if re>0:
-                if np.array_equiv(matrix[re:r,:], np.flipud(matrix[r:2*r,:])): score+=r*100
-            else:
-                if np.array_equiv(matrix[:r,:], np.flipud(matrix[r:2*r,:])): score+=r*100
+        score_tot+=score(matrix)
         mat=[]
-print(score)
+print(score_tot)
 
