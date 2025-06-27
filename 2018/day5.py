@@ -9,13 +9,27 @@ with open('C:\\Users\castelf\Documents\GitHub\AoC\\2018\day5.txt','r') as f: lin
 
 #line='dabAcCaCBAcCcaDA'
 
-noend=True
-while noend:
+def polymer(l):
     n=0
-    for a,b in zip(line,line[1:]):
-        if abs(ord(a)-ord(b))==32:
-            line=line[:n]+line[n+2:];break
-        if n==len(line)-2: noend=False
-        n+=1
+    tot=len(l)-2
+    while True:
+        if abs(ord(l[n])-ord(l[n+1]))==32:
+            l=l[:n]+l[n+2:]
+            tot-=2
+            if n>0: n-=1
+        else:
+            n+=1
+            if n>=tot:break
+    return len(l)
 
-print(len(line))
+print(polymer(line))
+
+import string
+
+res=[]
+for l,u in zip(list(string.ascii_lowercase),list(string.ascii_uppercase)):
+    newline=line.replace(l,'')
+    newline=newline.replace(u,'')
+    res.append(polymer(newline))
+
+print(min(res))
