@@ -6,6 +6,7 @@ Created on Wed Jul 23 14:50:04 2025
 """
 import re
 import numpy as np
+import matplotlib.pyplot as plt
 
 with open('C:\\Users\castelf\Documents\GitHub\AoC\\2018\day10.txt','r') as f: lines=f.readlines()
 
@@ -50,6 +51,24 @@ for line in lines:
 pos=np.array(pos)
 vit=np.array(vit)
 
-np.max(pos[:,0])
-np.max(pos[:,1])
-mat=np.zeros((np.max(pos[:,0]),np.max(pos[:,1])),dtype=int)
+# approach lights
+n=0
+while np.max(pos[:,0])-np.min(pos[:,0])>100:
+    pos+=vit
+    n+=1
+
+# Translation for positive values
+pos[:,0]-=np.min(pos[:,0])
+pos[:,1]-=np.min(pos[:,1])
+
+# Make the loop by hand
+pos+=vit
+n+=1
+
+mat=np.zeros((np.max(pos[:,1])+1,np.max(pos[:,0])+1),dtype=int)
+for p in pos: mat[p[1]][p[0]]=1
+
+fig,ax = plt.subplots(figsize=(12,12))
+ax.matshow(mat)
+
+
