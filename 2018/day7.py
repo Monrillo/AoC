@@ -6,15 +6,15 @@ Created on Tue Jul 22 10:32:19 2025
 """
 import networkx as nx
 
-with open('C:\\Users\castelf\Documents\GitHub\AoC\\2018\day7.txt','r') as f: lines=f.readlines()
+#with open('C:\\Users\castelf\Documents\GitHub\AoC\\2018\day7.txt','r') as f: lines=f.readlines()
 
-# lines=['Step C must be finished before step A can begin.',
-# 'Step C must be finished before step F can begin.',
-# 'Step A must be finished before step B can begin.',
-# 'Step A must be finished before step D can begin.',
-# 'Step B must be finished before step E can begin.',
-# 'Step D must be finished before step E can begin.',
-# 'Step F must be finished before step E can begin.']
+lines=['Step C must be finished before step A can begin.',
+'Step C must be finished before step F can begin.',
+'Step A must be finished before step B can begin.',
+'Step A must be finished before step D can begin.',
+'Step B must be finished before step E can begin.',
+'Step D must be finished before step E can begin.',
+'Step F must be finished before step E can begin.']
 
 # Implement a directed graph
 graph = nx.DiGraph()
@@ -37,8 +37,7 @@ while len(var)>0:
     var.sort()
     e=var.pop(0)
     if e not in res: res.append(e)
-    var_pos=[]
-    for i in list(graph.successors(e)): var_pos.append(i)
+    var_pos=list(graph.successors(e))
     for j in var_pos:
         if all(e in res for e in list(graph.predecessors(j))): var.append(j)
 
