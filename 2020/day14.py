@@ -28,10 +28,19 @@ for l in lines:
         
 print("Part 1:",sum(int(v, 2) for v in memory.values()))
 
-lines = ['mask = 000000000000000000000000000000X1001X',
-'mem[42] = 100',
-'mask = 00000000000000000000000000000000X0XX',
-'mem[26] = 1']
+def decoder(l):
+    r=[l]
+    while any('X' in e for e in r):
+        for i in range(len(r)):
+            if 'X' in r[i]: el=r.pop(i);break
+        r.append(el.replace('X','0',1))
+        r.append(el.replace('X','1',1))
+    return r
+
+# lines = ['mask = 000000000000000000000000000000X1001X',
+# 'mem[42] = 100',
+# 'mask = 00000000000000000000000000000000X0XX',
+# 'mem[26] = 1']
 
 memory={}
 
@@ -43,17 +52,7 @@ for l in lines:
         k=int(num[0])
         bin_num=format(k, '036b')
         res=''.join([bin_num[i] if mask[i]=='0' else mask[i] for i in range(36)])
-        memory[k]=res
+        for ad in decoder(res): memory[int(ad, 2)]=int(b)
 
-def decoder(l):
-    r=[l]
-    while any('X' in e for e in r):
-        for i in range(len(r)):
-            if 'X' in r[i]: el=r.pop(i);break
-        r.append(el.replace('X','0',1))
-        r.append(el.replace('X','1',1))
-    return r
+print("Part 2:",sum(memory.values()))
 
-for k in memory.keys(): memory[k]=sum(int(v, 2) for v in decoder(memory[k]))
-
-sum(memory.values())
