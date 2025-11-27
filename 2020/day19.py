@@ -21,22 +21,42 @@ def test(iterable):
 # '3: "b"']
 
 
-# lines=['0: 4 1 5',
-# '1: 2 3 | 3 2',
-# '2: 4 4 | 5 5',
-# '3: 4 5 | 5 4',
-# '4: "a"',
-# '5: "b"',
-# '',
-# 'ababbb',
-# 'bababa',
-# 'abbbab',
-# 'aaabbb',
-# 'aaaabbb']
+lines=['0: 4 1 5',
+'1: 2 3 | 3 2',
+'2: 4 4 | 5 5',
+'3: 4 5 | 5 4',
+'4: "a"',
+'5: "b"',
+'',
+'ababbb',
+'bababa',
+'abbbab',
+'aaabbb',
+'aaaabbb']
 
 recipe=True
 instr=[]
 phrase=[]
+
+for l in lines:
+    if l.strip()=='': recipe=False;continue
+    if recipe: instr.append(l.strip().replace('"','').split(': '))
+    else: phrase.append(l.strip())
+rec={}
+for i in instr:
+    rec[i[0]]=i[1].split(' | ')
+
+
+for m in re.match(r'(\d+)',test):print(m.start())
+
+
+
+
+
+
+
+
+
 
 for l in lines:
     if l.strip()=='': recipe=False;continue
@@ -49,6 +69,8 @@ for i in instr:
 for k in rec.keys():
     try: rec[k]=[[int(x) for x in rec[k][i].split()] for i in range(len(rec[k]))]
     except: rec[k]=[[x for x in rec[k][i].split()] for i in range(len(rec[k]))]
+
+rec[42]
 
 n=0
 while n<len(rec[0]):
