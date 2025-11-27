@@ -5,14 +5,14 @@ Created on Fri Nov 14 15:58:59 2025
 @author: castelf
 """
 
-#import re
+import re
 
 with open('C:\\Users\castelf\Documents\GitHub\AoC\\2020\day19.txt','r') as f: lines=f.readlines()
 
-def test(iterable):
-    try: res=next(iterable)
-    except: res=None
-    return res
+# def test(iterable):
+#     try: res=next(iterable)
+#     except: res=None
+#     return res
 
 
 # lines=['0: 1 2',
@@ -46,12 +46,33 @@ rec={}
 for i in instr:
     rec[i[0]]=i[1].split(' | ')
 
+for r in rec:
+    if len(rec[r])==1: rec[r]=rec[r][0].split()
+    else: rec[r]=[rec[r][i].split() for i in range(len(rec[r]))]
 
-for m in re.match(r'(\d+)',test):print(m.start())
 
 
 
 
+
+n=0
+while n<len(rec['0']):
+    if re.findall(r'(\d+)',rec['0'][n]):
+        p=rec['0'].pop(n)
+        num=re.findall(r'\d+',p)[0]
+        if len(rec[num])==1:
+            rec['0'].append(p.replace(num,rec[num][0]))
+        elif len(rec[num])==2:
+            p2=p
+            rec['0'].append(p.replace(num,rec[num][0]))
+            rec['0'].append(p2.replace(num,rec[num][1]))
+        n=0
+    else:
+        n+=1
+
+
+
+rec['2'][1].split()
 
 
 
@@ -267,8 +288,8 @@ def part2():
 rulesDict, messages = makeRules('C:\\Users\castelf\Documents\GitHub\AoC\\2020\day19.txt')
 rule0 = getRule(0)
 print(getLen(rule0))
-#total = sum(isValid(rule0, message) for message in messages)
-#print("Final count: " + str(total))
+total = sum(isValid(rule0, message) for message in messages)
+print("Part 1: " + str(total))
 
 p2count = part2()
-print("Final count: " + str(p2count))
+print("Part2 : " + str(p2count))
