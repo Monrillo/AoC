@@ -5,21 +5,19 @@ Created on Fri Dec  5 14:26:35 2025
 @author: castelf
 """
 
-import numpy as np
-
 with open('C:\\Users\castelf\Documents\GitHub\AoC\\2025\day5.txt','r') as f: lines=f.readlines()
 
-lines=['3-5',
-'10-14',
-'16-20',
-'12-18',
-'',
-'1',
-'5',
-'8',
-'11',
-'17',
-'32']
+# lines=['3-5',
+# '10-14',
+# '16-20',
+# '12-18',
+# '',
+# '1',
+# '5',
+# '8',
+# '11',
+# '17',
+# '32']
 
 recipe=True
 good=[]
@@ -36,8 +34,21 @@ good_ingredients=[i for i in ingredients if any(g[0]<=i<=g[1] for g in good)]
 
 print("Part 1:",len(good_ingredients))
 
-good=np.array(good)
-good[good[:,0]==np.min(good[:,0])][0]
+start=[g[0] for g in good]
+end=[g[1] for g in good]
+
+periods=[]
+while len(start)>0:
+    m=start.index(min(start))
+    fin=end.pop(m)
+    deb=start.pop(m)
+    while start and fin>=min(start):
+        m=start.index(min(start))
+        start.pop(m)
+        if end[m]>fin:fin=end.pop(m)
+        else:end.pop(m)
+    periods.append((deb,fin))
+
+print("Part 2:",sum(p[1]-p[0]+1 for p in periods))
 
 
-good.pop(np.where(good[:,0]==np.min(good[:,0]))[0][0])
