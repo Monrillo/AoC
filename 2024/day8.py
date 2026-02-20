@@ -48,8 +48,8 @@ for a in antennas:
         for j in range(i+1,len(antennas[a])):
             a1=antennas[a][i]
             a2=antennas[a][j]
-            if 0<=a1[0]<ligne and 0<=a1[1]<colonne:antinodes_2.add(a1)
-            if 0<=a2[0]<ligne and 0<=a2[1]<colonne:antinodes_2.add(a2)
+            antinodes_2.add(a1)
+            antinodes_2.add(a2)
             g1,g2=interfere(a1,a2)
             a1=(a1[0]+g1[0],a1[1]+g1[1])
             a2=(a2[0]+g2[0],a2[1]+g2[1])
