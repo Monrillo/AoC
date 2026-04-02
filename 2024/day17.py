@@ -43,8 +43,6 @@ def mod(n):
     num=combo(n)
     return num%8
 
-
-
 def opcode(code,oper):
     global position
     global output
@@ -74,8 +72,45 @@ while True:
 
 print("Part 1:",output)
 
-#Test with answer : 117440
 program=[0,3,5,4,3,0]
+
+for rega in range(120):
+    reg={'A': rega, 'B': 0, 'C': 0}
+    
+    position=0
+    output=[]
+    copy=output==program[:len(output)]
+    while True:
+        opcode(program[position],program[position+1])
+        if position>=len(program)-1:break
+    
+    print(rega,":",bin(rega)[2:],":",output)
+
+int('01110110011000',2)
+
+rega=7576
+reg={'A': rega, 'B': 0, 'C': 0}
+
+position=0
+output=[]
+copy=output==program[:len(output)]
+while True:
+    opcode(program[position],program[position+1])
+    if position>=len(program)-1:break
+
+print(rega,":",bin(rega)[2:],":",output)
+
+#Test with answer : 117440
+#program=[0,3,5,4,3,0]
+
+reg={}
+for line in lines:
+    l=line.strip('\n')
+    if l.startswith('Register'):
+        k,num=l.strip('Register ').split(': ')
+        reg[k]=int(num)
+    elif l.startswith('Program'):
+        program=[int(x) for x in l.split(': ')[1].split(',')]
 
 exact_copy=False
 rega=0
@@ -84,12 +119,25 @@ while not exact_copy:
     position=0
     output=[]
     copy=output==program[:len(output)]
-    while position<len(program)-1:
+    while True:
         opcode(program[position],program[position+1])
-        if position>=len(program)-1 or not copy or exact_copy:break
-    if exact_copy:break
+        if position>=len(program)-1 or not copy or exact_copy:
+            break
+    if exact_copy:
+        print("Part 2:",rega)
+        break
     rega+=1
 
-rega=117440
 
+
+import re
+numbers = [int(n) for n in re.findall(r"\d+", open('C:\\Users\castelf\Documents\GitHub\AoC\\2024\day17.txt','r').read())][-1:2:-1]
+def next_number(a, i):
+    if i == len(numbers):
+        print(a)
+        quit()
+    a2 = a << 3
+    for b in range(8):
+        if (b ^ (a2 + b >> (b ^ 7))) % 8 == numbers[i]: next_number(a2 + b, i + 1)
+next_number(0, 0)
 
