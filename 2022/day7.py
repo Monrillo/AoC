@@ -67,15 +67,19 @@ def folder_size(fol):
         elif isinstance(fol[f], dict): size+=folder_size(fol[f])
     return size
 
-# Score for part 1
-score=0     
+# Sizes of all folders
+sizes=[]
 
 for path in folders_list:
     # Positionning at the folder
     dic=folders
     for p in path: dic=dic[p]
-    si=folder_size(dic)
-    if si<=100000:
-        score+=si
+    sizes.append(folder_size(dic))
     
-print("Part 1:",score)
+print("Part 1:",sum(s for s in sizes if s<=100000))
+
+# The need of free up size
+free=sizes[0]-40000000
+
+print("Part 2:",sorted([s for s in sizes if s>=free])[0])
+
