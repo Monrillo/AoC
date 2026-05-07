@@ -39,7 +39,7 @@ class Monkey:
     # Initialize
     def __init__(self):
         self.items=[]
-        self.throw=(0,0)
+        self.inspection=0
     
     # Setters
     def add_item(self,item):
@@ -52,24 +52,99 @@ class Monkey:
         self.test_num = num
     
     def set_true(self,num):
-        self.throw[0]=num
+        self.true=num
         
     def set_false(self,num):
-        self.throw[1]=num
+        self.false=num
     
-    # Functions
-    def inspect(self,old):
+    # Getters
+    def get_inspect(self):
+        return self.inspection
+    
+    def get_items(self):
+        return self.items
+    
+    # Function
+    def inspect(self,part1):
+        self.inspection+=1
+        old=self.items.pop(0)
         new=eval(self.oper)
-        return new
+        if part1: new//=3
+        check=new%self.test_num==0
+        if check: return (self.true,new)
+        else: return (self.false,new)
 
-line=' old * old'
-old=2
-eval(line)
+monkeys=[]
+for line in lines:
+    if line.strip('\n')=='':monkeys.append(m)
+    elif line.strip('\n').startswith('Monkey'):m=Monkey();l=0
+    else:
+        l+=1
+        if l==1:
+            for x in line.strip('\n').split(': ')[1].split(', '):
+                m.add_item(int(x))
+        elif l==2:
+            m.set_oper(line.strip('\n').split('= ')[1])
+        elif l==3:
+            m.set_test(int(line.strip('\n').split('by ')[1]))
+        elif l==4:
+            m.set_true(int(line.strip('\n').split('monkey ')[1]))
+        elif l==5:
+            m.set_false(int(line.strip('\n').split('monkey ')[1]))
+monkeys.append(m)
 
+# for m in monkeys:
+#     print(m.get_items())
 
+for _ in range(20):
+    # Round
+    for m in monkeys:
+        while len(m.get_items())>0:
+            receiver,item = m.inspect(True)
+            monkeys[receiver].add_item(item)
 
+# Two most active monkeys
+a,b=sorted([m.get_inspect() for m in monkeys])[-2:]
 
+print("Part 1:",a*b)
 
+monkeys=[]
+for line in lines:
+    if line.strip('\n')=='':monkeys.append(m)
+    elif line.strip('\n').startswith('Monkey'):m=Monkey();l=0
+    else:
+        l+=1
+        if l==1:
+            for x in line.strip('\n').split(': ')[1].split(', '):
+                m.add_item(int(x))
+        elif l==2:
+            m.set_oper(line.strip('\n').split('= ')[1])
+        elif l==3:
+            m.set_test(int(line.strip('\n').split('by ')[1]))
+        elif l==4:
+            m.set_true(int(line.strip('\n').split('monkey ')[1]))
+        elif l==5:
+            m.set_false(int(line.strip('\n').split('monkey ')[1]))
+monkeys.append(m)
+
+exchange=[]
+r=0
+loop=False
+while r<700:
+    # Round
+    r+=1
+    for m in monkeys:
+        while len(m.get_items())>0:
+            receiver,item = m.inspect(False)
+            monkeys[receiver].add_item(item)
+    # I made superficial copy of items
+    res=[m.get_items()[:] for m in monkeys]
+    for e in exchange:
+        if res==e:
+            loop=True
+    if loop:
+        break
+    exchange.append(res)
 
 
 
