@@ -5,6 +5,91 @@ Created on Wed Feb 19 14:34:31 2025
 @author: castelf
 """
 
+from collections import deque
+from itertools import permutations
+
+inp = [line.strip() for line in open('C:\\Users\castelf\Documents\GitHub\AoC\\2016\day24.txt').readlines()]
+
+lines=['###########',
+'#0.1.....2#',
+'#.#######.#',
+'#4.......3#',
+'###########']
+inp=[line.strip() for line in lines]
+
+# find positions of characters in the map that are accepted by the predicate
+def find_in_map(mp, predicate):
+	return [(i,j) for i in range(len(mp)) for j in range(len(mp[i])) if predicate(mp[i][j])]
+
+zero_pos = find_in_map(inp, lambda x: x == '0')[0]
+
+# find all non-zero positions
+nums_pos = find_in_map(inp, lambda x: x in map(str, range(1, 10)))
+
+# BST stands for Binary Search Tree
+moves = set([(-1, 0), (1, 0), (0, 1), (0, -1)])
+q = deque([(0, zero_pos)])
+vis = set([zero_pos])
+n_pos = nums_pos[0]
+
+dst, cur = q.pop()
+if cur == n_pos:
+	print(dst)
+y, x = cur
+for dy, dx in moves:
+	ny, nx = y + dy, x + dx
+	if inp[ny][nx] != '#' and (ny, nx) not in vis:
+		q.appendleft((dst+1, (ny, nx)))
+		vis.add((ny, nx))
+
+# bfs distance from (y_fr,x_fr) to (y_to,x_to) assuming walls all around
+moves = set([(-1, 0), (1, 0), (0, 1), (0, -1)])
+def bfs_from_to(mp, fr, to):
+	q = deque([(0, fr)])
+	vis = set([fr])
+	while q:
+		dst, cur = q.pop()
+		if cur == to:
+			return dst
+		y, x = cur
+		for dy, dx in moves:
+			ny, nx = y + dy, x + dx
+			if mp[ny][nx] != '#' and (ny, nx) not in vis:
+				q.appendleft((dst+1, (ny, nx)))
+				vis.add((ny, nx))
+	return -1
+
+bfs_from_to(inp, zero_pos, nums_pos[0])
+
+# precompute distance from 0 to all other numbers
+dst_0 = [bfs_from_to(inp, zero_pos, n_pos) for n_pos in nums_pos]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import numpy as np
 
 mat=[list(line.strip()) for line in open('C:\\Users\castelf\Documents\GitHub\AoC\\2016\day24.txt','r')]
