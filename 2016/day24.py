@@ -8,17 +8,17 @@ Solution thanks to pedrosorio
 """
 
 from collections import deque
-#from itertools import permutations
+from itertools import permutations
 
-mat = [line.strip() for line in open('C:\\Users\Florent\Documents\GitHub\AoC\\2016\day24.txt').readlines()]
+mat = [line.strip() for line in open('C:\\Users\castelf\Documents\GitHub\AoC\\2016\day24.txt').readlines()]
 
-lines=['###########',
-'#0.1.....2#',
-'#.#######.#',
-'#4.......3#',
-'###########']
+# lines=['###########',
+# '#0.1.....2#',
+# '#.#######.#',
+# '#4.......3#',
+# '###########']
 
-mat=[line.strip() for line in lines]
+# mat=[line.strip() for line in lines]
 
 # find position of numbers into the map
 def find_position(mp, num):
@@ -45,102 +45,36 @@ def dist_from_to(mp, fr, to):
         y, x = pos
         for dy, dx in directions:
             ny, nx = y + dy, x + dx
-            if mp[ny][nx]!='#' and mp[ny][nx] not in visited:
+            if mp[ny][nx]!='#' and (ny, nx) not in visited:
                 visited.add((ny, nx))
                 path.appendleft((dist+1,(ny, nx)))
 
+# Compute distances from initial position (0)
 dst_init = [dist_from_to(mat, init_pos, n_pos) for n_pos in num_pos]
 
+# Compute distances between all other numbers
+K = len(num_pos)
+distances = [[None for j in range(K)] for i in range(K)]
+for i in range(K):
+    for j in range(i+1,K):
+        distances[i][j] = distances[j][i] = dist_from_to(mat, num_pos[i], num_pos[j])
 
+# Once all distances have been computed between numbers, the problem is like a
+# TSP (for Travelling Salesman Problem) with O(K!) complexity but this can be
+# computed in our case because of the limited amount of points in our maze
 
+# At first I tried to compute all route lengths and select the shortest one
+# It does not work, too many routes, I use the solution from pedrosorio with
+# a for loop and returning the shortest result
 
+length_1, length_2 = 1e12, 1e12
+for path in permutations(range(K)):
+    #computation of the length of a path
+    dst = dst_init[path[0]] + sum(distances[path[i]][path[i+1]] for i in range(len(path)-1))
+    length_1 = min(length_1, dst)
+    dst += dst_init[path[-1]]
+    length_2 = min(length_2, dst)
 
+print("Part 1:",length_1)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-import numpy as np
-
-mat=[list(line.strip()) for line in open('C:\\Users\castelf\Documents\GitHub\AoC\\2016\day24.txt','r')]
-
-# lines=['###########',
-# '#0.1.....2#',
-# '#.#######.#',
-# '#4.......3#',
-# '###########']
-# mat=[list(line.strip()) for line in lines]
-
-# Creation of the matrix area
-area=np.empty((len(mat),len(mat[0])),dtype=str)
-for r in range(len(mat)):
-    for c in range(len(mat[0])):
-        area[r][c]=mat[r][c]
-
-#print(area)
-
-# List of number and their position in the matrix
-num_pos=[(np.where(area==str(0))[0][0],np.where(area==str(0))[1][0])]
-for i in range(1,10):
-    if len(np.where(area==str(i))[0])!=0:
-        r,c=np.where(area==str(i))
-        num_pos.append((r[0],c[0]))
-
-# From previous day13
-def move(w):
-    y=w[-1][0];x=w[-1][1]
-    pos_m=[]
-    link=[]
-    if y-1>=0 and area[y-1,x]=='.' and (y-1,x) not in w: pos_m.append(w+[(y-1,x)])
-    if (y-1,x) in num_pos: link.append(w+[(y-1,x)])
-    if y+1<len(area) and area[y+1,x]=='.' and (y+1,x) not in w: pos_m.append(w+[(y+1,x)])
-    if (y+1,x) in num_pos: link.append(w+[(y+1,x)])
-    if x-1>=0 and area[y,x-1]=='.' and (y,x-1) not in w: pos_m.append(w+[(y,x-1)])
-    if (y,x-1) in num_pos: link.append(w+[(y,x-1)])
-    if x+1<len(area) and area[y,x+1]=='.' and (y,x+1) not in w: pos_m.append(w+[(y,x+1)])
-    if (y,x+1) in num_pos: link.append(w+[(y,x+1)])
-    return pos_m,link
-
-
-# Distance between each pair of numbers
-links=[]
-dist=[]
-for pos in num_pos:
-    way=[[pos]]
-    while len(way)>0:
-        p=way.pop(0)
-        paths,connec=move(p)
-        if connec:
-            for c in connec:
-                if c[0]!=c[-1]:
-                    links.append((min(num_pos.index(c[0]),num_pos.index(c[-1])),max(num_pos.index(c[0]),num_pos.index(c[-1]))))
-                    dist.append(len(c)-1)
-        way+=paths
-
-# Minimum distance between each pair of numbers
-min_links=[]
-min_dist=[]
-for i,l in enumerate(sorted(links)):
-    if l in min_links:
-        if min_dist[min_links.index(l)]>dist[i]: min_dist[min_links.index(l)]=dist[i]
-    else:
-        min_links.append(l)
-        min_dist.append(dist[i])
+print("Part 2:",length_2)
