@@ -17,3 +17,7 @@ lines=['x=495, y=2..7',
 'y=13, x=498..504']
 
 for line in lines: print(line.strip().split(', '))
+
+
+
+
