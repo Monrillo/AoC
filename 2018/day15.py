@@ -21,13 +21,16 @@ class Creature:
     """Un elfe ou un gobelin qui vit sur la grille."""
     kind: str                     # "E" pour elfe, "G" pour gobelin
     pos: Tuple[int, int]          # (x, y) – x = colonne, y = ligne
+    weapon: int                   # puissance d'attaque en plus pour les elfes
     hp: int = 200                 # points de vie de base (peut être personnalisé)
-    attack: int = 3               # puissance d'attaque (modifiable)
     arena: "Arena" = field(repr=False, compare=False, init=False)   # référence vers la carte
-
+    
     def __post_init__(self) -> None:
         assert self.kind in {"E", "G"}, "kind doit être 'E' ou 'G'"
-
+        self.attack = 3
+        if self.kind == 'E':
+            self.attack += self.weapon
+    
     @property
     def is_elf(self) -> bool:
         return self.kind == "E"
@@ -51,8 +54,10 @@ class Creature:
     def attack_target(self, target: Creature) -> None:
         """Inflige des dégâts au cible et la retire de l'arène si elle meurt."""
         target.hp -= self.attack
+        self.arena._updating_score(self, self.attack)
         if target.hp <= 0:
             self.arena._remove_creature(target)
+            self.arena._updating_score(self, target.hp)
 
     # ------------------------------------------------------------------
     # Représentation lisible pour le debug
@@ -68,10 +73,12 @@ class Arena:
     - `pos2creature` : dictionnaire {(x, y): Creature}
     """
 
-    def __init__(self, raw_map: str) -> None:
+    def __init__(self, raw_map: str, elf_weapon: int) -> None:
+        self.elf_weapon = elf_weapon             # arme en plus pour les elfes
         self.grid: List[List[str]] = []          # mur = '#', sol = '.'
         self.creatures: List[Creature] = []      # ordre de lecture (top‑left → bottom‑right)
         self.pos2creature: Dict[Tuple[int, int], Creature] = {}
+        self.score: Dict = {'E': 0, 'G': 0}
 
         self._parse(raw_map)
 
@@ -88,7 +95,7 @@ class Arena:
             row = []
             for x, ch in enumerate(line.rstrip("\n")):
                 if ch in "EG":                     # une créature se trouve ici
-                    creature = Creature(kind=ch, pos=(x, y))
+                    creature = Creature(kind=ch, pos=(x, y), weapon=self.elf_weapon)
                     # On indique à la créature à quel arena elle appartient
                     creature.arena = self
                     self.creatures.append(creature)
@@ -112,6 +119,7 @@ class Arena:
     # ------------------------------------------------------------------
     # Manipulation du dictionnaire central
     # ------------------------------------------------------------------
+    
     def _move_creature(self, creature: Creature, new_pos: Tuple[int, int]) -> None:
         """Met à jour `pos2creature` lorsqu’une créature se déplace."""
         if not self.is_free(new_pos):
@@ -129,6 +137,13 @@ class Arena:
         self.pos2creature.pop(creature.pos, None)
         # retirer de la liste principale (on garde l’ordre de lecture en filtrant)
         self.creatures = [c for c in self.creatures if c is not creature]
+
+    # ------------------------------------------------------------------
+    # Manipulation du score de chaque sorte de créatures
+    # ------------------------------------------------------------------
+    def _updating_score(self, creature: Creature, damage: int) -> None:
+        """Modifie le score de l'équipe de la créature en ajoutant le nombre de dégats à l'équipe adverse."""
+        self.score[creature.kind] += damage
 
     # ------------------------------------------------------------------
     # Extraits utiles pour le combat (facultatif)
@@ -180,7 +195,7 @@ def bfs_shortest_path(start: Tuple[int,int], goals: List[Tuple[int,int]], arena:
             queue.append((nxt, path + [nxt]))
     return None
 
-def play_one_round(arena: Arena) -> bool:
+def play_one_round(arena: Arena, part2: bool) -> bool:
     """Retourne True si le combat se poursuit, False si une équipe a été éliminée."""
     for creature in arena.living_creatures():
         # La créature a pu mourir plus tôt dans le round (par exemple par un voisin précédent)
@@ -220,42 +235,72 @@ def play_one_round(arena: Arena) -> bool:
             target = min(adjacent_enemies,
                          key=lambda e: (e.hp, e.pos[1], e.pos[0]))
             creature.attack_target(target)
+            # Pour la partie 2, le combat s'arrête si un elfe meurt
+            if part2 and target.is_elf and target.hp <=0:
+                return False
 
     return True   # combat continue
 
-
-sample_map = """
-#######   
-#.G...#
-#...EG#
-#.#.#G#
-#..G#E#
-#.....#   
-#######
-"""
-
-# Implementation of the map
-arena = Arena(sample_map)
-rnd = 0
-# Boucle des rounds
-while True:
-    if not alive:
-        break
-    rnd+=1
-    alive = play_one_round(arena)
-    print(f"--- After round {rnd} ---")
-    print(arena.render())
-    print()
+def fight(map_arena: str, elf_advantage: int, part: bool):
+    """Retourne le score du combat (ou -1 si un elfe est mort pour la partie 2)"""
+    # Implementation of the map
+    arena = Arena(map_arena, elf_advantage)
+    rnd = 0
     
+    # Boucle des rounds
+    while True:
+        rnd+=1
+        alive = play_one_round(arena, part)
+        if not alive:
+            rnd-=1
+            break
     
-
-print(f"--- After round {rnd-1} ---")
-print(arena.render())
-print()
-
-
-
-
+    # Retourne le score du combat
+    # Si on est dans la partie 2 et qu'un elfe est mort, retourne -1
+    if part and any(c.is_goblin for c in arena.living_creatures()):
+        return -1
+    else:
+        return rnd * sum(c.hp for c in arena.living_creatures())
 
 
+# input_arena = """
+# #######   
+# #.G...#
+# #...EG#
+# #.#.#G#
+# #..G#E#
+# #.....#   
+# #######
+# """
+
+# input_arena = """
+# #######
+# #E..EG#
+# #.#G.E#
+# #E.##E#
+# #G..#.#
+# #..E#.#
+# #######
+# """
+
+# input_arena = """
+# #######
+# #E.G#.#
+# #.#G..#
+# #G.#.G#
+# #G..#.#
+# #...E.#
+# #######
+# """
+
+print("Part 1:", fight(input_arena, 0, False))
+
+score = -1
+elf_attack_added = 0
+
+while score == -1:
+    elf_attack_added+=1
+    score = fight(input_arena, elf_attack_added, True)
+
+print("Part 2:", score)
 
